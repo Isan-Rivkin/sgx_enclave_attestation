@@ -5,11 +5,12 @@
 #include <stdio.h>  
 #include "sgx_tcrypto.h"
 
-
-sgx_ecc_state_handle_t * ecc_handle;
+sgx_ecc_state_handle_t context;
+sgx_ecc_state_handle_t * ecc_handle = &context;
 sgx_status_t status;
 sgx_ec256_private_t * pPrivate;
 //sgx_ec256_public_t * pPublic;
+// PROBLEM : the ecc_gandle context is null as seen inside the debbuger break point #21
 void ecall_generate_ecc_key_pair(sgx_ec256_public_t * pPublic)
 {
 	ocall_print_string("Generated key pair!\n");

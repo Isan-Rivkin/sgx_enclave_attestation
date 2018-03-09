@@ -1,6 +1,4 @@
-﻿  Creating proxy/bridge routines
-  Enclave.cpp
-  Enclave_t.c
+﻿  Enclave.cpp
      Creating library D:\Enigma\SGX\MyProjects\Enclave\x64\Debug\Enclave.lib and object D:\Enigma\SGX\MyProjects\Enclave\x64\Debug\Enclave.exp
   Enclave.vcxproj -> D:\Enigma\SGX\MyProjects\Enclave\x64\Debug\Enclave.dll
   Enclave.vcxproj -> D:\Enigma\SGX\MyProjects\Enclave\x64\Debug\Enclave.pdb (Full PDB)
