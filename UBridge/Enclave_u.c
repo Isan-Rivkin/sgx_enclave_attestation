@@ -8,7 +8,7 @@ typedef struct ms_ecall_sum_array_t {
 } ms_ecall_sum_array_t;
 
 typedef struct ms_ecall_generate_ecc_key_pair_t {
-	int* ms_oPublic;
+	sgx_ec256_public_t* ms_pPublic;
 } ms_ecall_generate_ecc_key_pair_t;
 
 typedef struct ms_ecall_sum_values_t {
@@ -140,11 +140,11 @@ sgx_status_t ecall_sum_array(sgx_enclave_id_t eid, int* arr, size_t size, int* r
 	return status;
 }
 
-sgx_status_t ecall_generate_ecc_key_pair(sgx_enclave_id_t eid, int* oPublic)
+sgx_status_t ecall_generate_ecc_key_pair(sgx_enclave_id_t eid, sgx_ec256_public_t* pPublic)
 {
 	sgx_status_t status;
 	ms_ecall_generate_ecc_key_pair_t ms;
-	ms.ms_oPublic = oPublic;
+	ms.ms_pPublic = pPublic;
 	status = sgx_ecall(eid, 1, &ocall_table_Enclave, &ms);
 	return status;
 }

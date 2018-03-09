@@ -6,6 +6,8 @@
 #include <stddef.h>
 #include "sgx_edger8r.h" /* for sgx_ocall etc. */
 
+#include "sgx_trts.h"
+#include "sgx_tcrypto.h"
 
 #define SGX_CAST(type, item) ((type)(item))
 
@@ -15,7 +17,7 @@ extern "C" {
 
 
 void ecall_sum_array(int* arr, size_t size, int* result);
-void ecall_generate_ecc_key_pair(int* oPublic);
+void ecall_generate_ecc_key_pair(sgx_ec256_public_t* pPublic);
 void ecall_sum_values(int arr[5], int* result);
 void enclaveChangeBuffer(char* buf, size_t len);
 void enclaveStringSave(char* input, size_t len);

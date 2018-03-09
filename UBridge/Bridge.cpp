@@ -35,9 +35,18 @@ int main()
 	}
 	// generate key pair 
 	sgx_ec256_private_t * pPrivate;
-	sgx_ec256_public_t * pPublic;
+	sgx_ec256_public_t  pub;
+	sgx_ec256_public_t * pPublic = &pub;
 	int a[2] = { 0 };
-	ecall_generate_ecc_key_pair(eid,a);
+	uint8_t gy[SGX_ECP256_KEY_SIZE];
+	ecall_generate_ecc_key_pair(eid,pPublic);
+	std::cout << pPublic->gx << std::endl;
+	std::cout << pPublic->gy << std::endl;
+	//for (int i = 0; i < SGX_ECP256_KEY_SIZE; ++i) {
+	//	std::cout << pPublic->gx[i] << std::endl;
+	//	std::cout << pPublic->gy[i] << std::endl;
+	//}
+
 	// change buffer 
 	std::cout << "Buffer before change: " << buffer << std::endl;
 	enclaveChangeBuffer(eid, buffer, BUF_LEN);

@@ -2,11 +2,13 @@ enclave {
     from "sgx_tstdc.edl" import *;
 
 	/*from "BasicOperations.edl" import *; */
-
+	include "sgx_trts.h"
+	include "sgx_tcrypto.h"
+		
     trusted {
         /* define ECALLs here. */
 		public void ecall_sum_array([in, out, count=size] int *arr,size_t size, [in,out]int * result);
-		public void ecall_generate_ecc_key_pair([in,out] int * oPublic);
+		public void ecall_generate_ecc_key_pair([out] sgx_ec256_public_t * pPublic);
 
 		/* to be deleted */
 		public void ecall_sum_values([in,out] int arr[5], [in,out] int * result);

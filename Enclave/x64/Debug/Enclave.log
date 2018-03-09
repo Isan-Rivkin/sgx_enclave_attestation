@@ -4,6 +4,8 @@
      Creating library D:\Enigma\SGX\MyProjects\Enclave\x64\Debug\Enclave.lib and object D:\Enigma\SGX\MyProjects\Enclave\x64\Debug\Enclave.exp
   Enclave.vcxproj -> D:\Enigma\SGX\MyProjects\Enclave\x64\Debug\Enclave.dll
   Enclave.vcxproj -> D:\Enigma\SGX\MyProjects\Enclave\x64\Debug\Enclave.pdb (Full PDB)
+  The required memory is 0x1bb000.
+  Succeed.
   <EnclaveConfiguration>
       <ProdID>0</ProdID>
       <ISVSVN>0</ISVSVN>
@@ -15,5 +17,3 @@
       <MiscSelect>0</MiscSelect>
       <MiscMask>0xFFFFFFFF</MiscMask>
   </EnclaveConfiguration>
-  The required memory is 0x1bb000.
-  Succeed.

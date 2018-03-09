@@ -1,6 +1,5 @@
 ﻿  Bridge.cpp
-d:\enigma\sgx\myprojects\enclave\ubridge\bridge.cpp(38): warning C4101: 'pPublic': unreferenced local variable
 d:\enigma\sgx\myprojects\enclave\ubridge\bridge.cpp(37): warning C4101: 'pPrivate': unreferenced local variable
-  Enclave_u.c
+d:\enigma\sgx\myprojects\enclave\ubridge\bridge.cpp(41): warning C4101: 'gy': unreferenced local variable
   UBridge.vcxproj -> D:\Enigma\SGX\MyProjects\Enclave\x64\Debug\UBridge.exe
   UBridge.vcxproj -> D:\Enigma\SGX\MyProjects\Enclave\x64\Debug\UBridge.pdb (Full PDB)

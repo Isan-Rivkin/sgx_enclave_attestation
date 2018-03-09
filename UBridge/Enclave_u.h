@@ -7,6 +7,8 @@
 #include <string.h>
 #include "sgx_edger8r.h" /* for sgx_status_t etc. */
 
+#include "sgx_trts.h"
+#include "sgx_tcrypto.h"
 
 #define SGX_CAST(type, item) ((type)(item))
 
@@ -22,7 +24,7 @@ int SGX_UBRIDGE(SGX_CDECL, sgx_thread_setwait_untrusted_events_ocall, (const voi
 int SGX_UBRIDGE(SGX_CDECL, sgx_thread_set_multiple_untrusted_events_ocall, (const void** waiters, size_t total));
 
 sgx_status_t ecall_sum_array(sgx_enclave_id_t eid, int* arr, size_t size, int* result);
-sgx_status_t ecall_generate_ecc_key_pair(sgx_enclave_id_t eid, int* oPublic);
+sgx_status_t ecall_generate_ecc_key_pair(sgx_enclave_id_t eid, sgx_ec256_public_t* pPublic);
 sgx_status_t ecall_sum_values(sgx_enclave_id_t eid, int arr[5], int* result);
 sgx_status_t enclaveChangeBuffer(sgx_enclave_id_t eid, char* buf, size_t len);
 sgx_status_t enclaveStringSave(sgx_enclave_id_t eid, char* input, size_t len);

@@ -24,7 +24,7 @@ typedef struct ms_ecall_sum_array_t {
 } ms_ecall_sum_array_t;
 
 typedef struct ms_ecall_generate_ecc_key_pair_t {
-	int* ms_oPublic;
+	sgx_ec256_public_t* ms_pPublic;
 } ms_ecall_generate_ecc_key_pair_t;
 
 typedef struct ms_ecall_sum_values_t {
@@ -154,11 +154,11 @@ static sgx_status_t SGX_CDECL sgx_ecall_generate_ecc_key_pair(void* pms)
 	CHECK_REF_POINTER(pms, sizeof(ms_ecall_generate_ecc_key_pair_t));
 	ms_ecall_generate_ecc_key_pair_t* ms = SGX_CAST(ms_ecall_generate_ecc_key_pair_t*, pms);
 	sgx_status_t status = SGX_SUCCESS;
-	int* _tmp_oPublic = ms->ms_oPublic;
-	size_t _len_oPublic = sizeof(*_tmp_oPublic);
-	int* _in_oPublic = NULL;
+	sgx_ec256_public_t* _tmp_pPublic = ms->ms_pPublic;
+	size_t _len_pPublic = sizeof(*_tmp_pPublic);
+	sgx_ec256_public_t* _in_pPublic = NULL;
 
-	CHECK_UNIQUE_POINTER(_tmp_oPublic, _len_oPublic);
+	CHECK_UNIQUE_POINTER(_tmp_pPublic, _len_pPublic);
 
 
 	//
@@ -166,21 +166,20 @@ static sgx_status_t SGX_CDECL sgx_ecall_generate_ecc_key_pair(void* pms)
 	//
 	_mm_lfence();
 
-	if (_tmp_oPublic != NULL && _len_oPublic != 0) {
-		_in_oPublic = (int*)malloc(_len_oPublic);
-		if (_in_oPublic == NULL) {
+	if (_tmp_pPublic != NULL && _len_pPublic != 0) {
+		if ((_in_pPublic = (sgx_ec256_public_t*)malloc(_len_pPublic)) == NULL) {
 			status = SGX_ERROR_OUT_OF_MEMORY;
 			goto err;
 		}
 
-		memcpy(_in_oPublic, _tmp_oPublic, _len_oPublic);
+		memset((void*)_in_pPublic, 0, _len_pPublic);
 	}
 
-	ecall_generate_ecc_key_pair(_in_oPublic);
+	ecall_generate_ecc_key_pair(_in_pPublic);
 err:
-	if (_in_oPublic) {
-		memcpy(_tmp_oPublic, _in_oPublic, _len_oPublic);
-		free(_in_oPublic);
+	if (_in_pPublic) {
+		memcpy(_tmp_pPublic, _in_pPublic, _len_pPublic);
+		free(_in_pPublic);
 	}
 
 	return status;
