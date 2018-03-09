@@ -1,0 +1,19 @@
+﻿  Creating proxy/bridge routines
+  Enclave.cpp
+  Enclave_t.c
+     Creating library D:\Enigma\SGX\MyProjects\Enclave\x64\Debug\Enclave.lib and object D:\Enigma\SGX\MyProjects\Enclave\x64\Debug\Enclave.exp
+  Enclave.vcxproj -> D:\Enigma\SGX\MyProjects\Enclave\x64\Debug\Enclave.dll
+  Enclave.vcxproj -> D:\Enigma\SGX\MyProjects\Enclave\x64\Debug\Enclave.pdb (Full PDB)
+  <EnclaveConfiguration>
+      <ProdID>0</ProdID>
+      <ISVSVN>0</ISVSVN>
+      <StackMaxSize>0x40000</StackMaxSize>
+      <HeapMaxSize>0x100000</HeapMaxSize>
+      <TCSNum>1</TCSNum>
+      <TCSPolicy>1</TCSPolicy>
+      <DisableDebug>0</DisableDebug>
+      <MiscSelect>0</MiscSelect>
+      <MiscMask>0xFFFFFFFF</MiscMask>
+  </EnclaveConfiguration>
+  The required memory is 0x1bb000.
+  Succeed.
