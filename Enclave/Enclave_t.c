@@ -23,9 +23,23 @@ typedef struct ms_ecall_sum_array_t {
 	int* ms_result;
 } ms_ecall_sum_array_t;
 
-typedef struct ms_ecall_generate_ecc_key_pair_t {
+typedef struct ms_ecall_test_t {
+	sgx_ec256_private_t* ms_pPrivate;
 	sgx_ec256_public_t* ms_pPublic;
-} ms_ecall_generate_ecc_key_pair_t;
+	sgx_ecc_state_handle_t* ms_handle;
+} ms_ecall_test_t;
+
+typedef struct ms_ecall_ECDSAsignMessage_t {
+	sgx_ec256_private_t* ms_p_private;
+	sgx_ecc_state_handle_t* ms_ecc_handle;
+	sgx_ec256_signature_t* ms_p_signature;
+} ms_ecall_ECDSAsignMessage_t;
+
+typedef struct ms_ecall_ECDSAverifyMessage_t {
+	sgx_ec256_public_t* ms_p_public;
+	sgx_ec256_signature_t* ms_p_signature;
+	sgx_ecc_state_handle_t* ms_ecc_handle;
+} ms_ecall_ECDSAverifyMessage_t;
 
 typedef struct ms_ecall_sum_values_t {
 	int* ms_arr;
@@ -149,16 +163,24 @@ err:
 	return status;
 }
 
-static sgx_status_t SGX_CDECL sgx_ecall_generate_ecc_key_pair(void* pms)
+static sgx_status_t SGX_CDECL sgx_ecall_test(void* pms)
 {
-	CHECK_REF_POINTER(pms, sizeof(ms_ecall_generate_ecc_key_pair_t));
-	ms_ecall_generate_ecc_key_pair_t* ms = SGX_CAST(ms_ecall_generate_ecc_key_pair_t*, pms);
+	CHECK_REF_POINTER(pms, sizeof(ms_ecall_test_t));
+	ms_ecall_test_t* ms = SGX_CAST(ms_ecall_test_t*, pms);
 	sgx_status_t status = SGX_SUCCESS;
+	sgx_ec256_private_t* _tmp_pPrivate = ms->ms_pPrivate;
+	size_t _len_pPrivate = sizeof(*_tmp_pPrivate);
+	sgx_ec256_private_t* _in_pPrivate = NULL;
 	sgx_ec256_public_t* _tmp_pPublic = ms->ms_pPublic;
 	size_t _len_pPublic = sizeof(*_tmp_pPublic);
 	sgx_ec256_public_t* _in_pPublic = NULL;
+	sgx_ecc_state_handle_t* _tmp_handle = ms->ms_handle;
+	size_t _len_handle = sizeof(*_tmp_handle);
+	sgx_ecc_state_handle_t* _in_handle = NULL;
 
+	CHECK_UNIQUE_POINTER(_tmp_pPrivate, _len_pPrivate);
 	CHECK_UNIQUE_POINTER(_tmp_pPublic, _len_pPublic);
+	CHECK_UNIQUE_POINTER(_tmp_handle, _len_handle);
 
 
 	//
@@ -166,20 +188,189 @@ static sgx_status_t SGX_CDECL sgx_ecall_generate_ecc_key_pair(void* pms)
 	//
 	_mm_lfence();
 
-	if (_tmp_pPublic != NULL && _len_pPublic != 0) {
-		if ((_in_pPublic = (sgx_ec256_public_t*)malloc(_len_pPublic)) == NULL) {
+	if (_tmp_pPrivate != NULL && _len_pPrivate != 0) {
+		_in_pPrivate = (sgx_ec256_private_t*)malloc(_len_pPrivate);
+		if (_in_pPrivate == NULL) {
 			status = SGX_ERROR_OUT_OF_MEMORY;
 			goto err;
 		}
 
-		memset((void*)_in_pPublic, 0, _len_pPublic);
+		memcpy(_in_pPrivate, _tmp_pPrivate, _len_pPrivate);
+	}
+	if (_tmp_pPublic != NULL && _len_pPublic != 0) {
+		_in_pPublic = (sgx_ec256_public_t*)malloc(_len_pPublic);
+		if (_in_pPublic == NULL) {
+			status = SGX_ERROR_OUT_OF_MEMORY;
+			goto err;
+		}
+
+		memcpy(_in_pPublic, _tmp_pPublic, _len_pPublic);
+	}
+	if (_tmp_handle != NULL && _len_handle != 0) {
+		_in_handle = (sgx_ecc_state_handle_t*)malloc(_len_handle);
+		if (_in_handle == NULL) {
+			status = SGX_ERROR_OUT_OF_MEMORY;
+			goto err;
+		}
+
+		memcpy(_in_handle, _tmp_handle, _len_handle);
 	}
 
-	ecall_generate_ecc_key_pair(_in_pPublic);
+	ecall_test(_in_pPrivate, _in_pPublic, _in_handle);
 err:
+	if (_in_pPrivate) {
+		memcpy(_tmp_pPrivate, _in_pPrivate, _len_pPrivate);
+		free(_in_pPrivate);
+	}
 	if (_in_pPublic) {
 		memcpy(_tmp_pPublic, _in_pPublic, _len_pPublic);
 		free(_in_pPublic);
+	}
+	if (_in_handle) {
+		memcpy(_tmp_handle, _in_handle, _len_handle);
+		free(_in_handle);
+	}
+
+	return status;
+}
+
+static sgx_status_t SGX_CDECL sgx_ecall_ECDSAsignMessage(void* pms)
+{
+	CHECK_REF_POINTER(pms, sizeof(ms_ecall_ECDSAsignMessage_t));
+	ms_ecall_ECDSAsignMessage_t* ms = SGX_CAST(ms_ecall_ECDSAsignMessage_t*, pms);
+	sgx_status_t status = SGX_SUCCESS;
+	sgx_ec256_private_t* _tmp_p_private = ms->ms_p_private;
+	size_t _len_p_private = sizeof(*_tmp_p_private);
+	sgx_ec256_private_t* _in_p_private = NULL;
+	sgx_ecc_state_handle_t* _tmp_ecc_handle = ms->ms_ecc_handle;
+	size_t _len_ecc_handle = sizeof(*_tmp_ecc_handle);
+	sgx_ecc_state_handle_t* _in_ecc_handle = NULL;
+	sgx_ec256_signature_t* _tmp_p_signature = ms->ms_p_signature;
+	size_t _len_p_signature = sizeof(*_tmp_p_signature);
+	sgx_ec256_signature_t* _in_p_signature = NULL;
+
+	CHECK_UNIQUE_POINTER(_tmp_p_private, _len_p_private);
+	CHECK_UNIQUE_POINTER(_tmp_ecc_handle, _len_ecc_handle);
+	CHECK_UNIQUE_POINTER(_tmp_p_signature, _len_p_signature);
+
+
+	//
+	// fence after pointer checks
+	//
+	_mm_lfence();
+
+	if (_tmp_p_private != NULL && _len_p_private != 0) {
+		_in_p_private = (sgx_ec256_private_t*)malloc(_len_p_private);
+		if (_in_p_private == NULL) {
+			status = SGX_ERROR_OUT_OF_MEMORY;
+			goto err;
+		}
+
+		memcpy(_in_p_private, _tmp_p_private, _len_p_private);
+	}
+	if (_tmp_ecc_handle != NULL && _len_ecc_handle != 0) {
+		_in_ecc_handle = (sgx_ecc_state_handle_t*)malloc(_len_ecc_handle);
+		if (_in_ecc_handle == NULL) {
+			status = SGX_ERROR_OUT_OF_MEMORY;
+			goto err;
+		}
+
+		memcpy(_in_ecc_handle, _tmp_ecc_handle, _len_ecc_handle);
+	}
+	if (_tmp_p_signature != NULL && _len_p_signature != 0) {
+		_in_p_signature = (sgx_ec256_signature_t*)malloc(_len_p_signature);
+		if (_in_p_signature == NULL) {
+			status = SGX_ERROR_OUT_OF_MEMORY;
+			goto err;
+		}
+
+		memcpy(_in_p_signature, _tmp_p_signature, _len_p_signature);
+	}
+
+	ecall_ECDSAsignMessage(_in_p_private, _in_ecc_handle, _in_p_signature);
+err:
+	if (_in_p_private) {
+		memcpy(_tmp_p_private, _in_p_private, _len_p_private);
+		free(_in_p_private);
+	}
+	if (_in_ecc_handle) {
+		memcpy(_tmp_ecc_handle, _in_ecc_handle, _len_ecc_handle);
+		free(_in_ecc_handle);
+	}
+	if (_in_p_signature) {
+		memcpy(_tmp_p_signature, _in_p_signature, _len_p_signature);
+		free(_in_p_signature);
+	}
+
+	return status;
+}
+
+static sgx_status_t SGX_CDECL sgx_ecall_ECDSAverifyMessage(void* pms)
+{
+	CHECK_REF_POINTER(pms, sizeof(ms_ecall_ECDSAverifyMessage_t));
+	ms_ecall_ECDSAverifyMessage_t* ms = SGX_CAST(ms_ecall_ECDSAverifyMessage_t*, pms);
+	sgx_status_t status = SGX_SUCCESS;
+	sgx_ec256_public_t* _tmp_p_public = ms->ms_p_public;
+	size_t _len_p_public = sizeof(*_tmp_p_public);
+	sgx_ec256_public_t* _in_p_public = NULL;
+	sgx_ec256_signature_t* _tmp_p_signature = ms->ms_p_signature;
+	size_t _len_p_signature = sizeof(*_tmp_p_signature);
+	sgx_ec256_signature_t* _in_p_signature = NULL;
+	sgx_ecc_state_handle_t* _tmp_ecc_handle = ms->ms_ecc_handle;
+	size_t _len_ecc_handle = sizeof(*_tmp_ecc_handle);
+	sgx_ecc_state_handle_t* _in_ecc_handle = NULL;
+
+	CHECK_UNIQUE_POINTER(_tmp_p_public, _len_p_public);
+	CHECK_UNIQUE_POINTER(_tmp_p_signature, _len_p_signature);
+	CHECK_UNIQUE_POINTER(_tmp_ecc_handle, _len_ecc_handle);
+
+
+	//
+	// fence after pointer checks
+	//
+	_mm_lfence();
+
+	if (_tmp_p_public != NULL && _len_p_public != 0) {
+		_in_p_public = (sgx_ec256_public_t*)malloc(_len_p_public);
+		if (_in_p_public == NULL) {
+			status = SGX_ERROR_OUT_OF_MEMORY;
+			goto err;
+		}
+
+		memcpy(_in_p_public, _tmp_p_public, _len_p_public);
+	}
+	if (_tmp_p_signature != NULL && _len_p_signature != 0) {
+		_in_p_signature = (sgx_ec256_signature_t*)malloc(_len_p_signature);
+		if (_in_p_signature == NULL) {
+			status = SGX_ERROR_OUT_OF_MEMORY;
+			goto err;
+		}
+
+		memcpy(_in_p_signature, _tmp_p_signature, _len_p_signature);
+	}
+	if (_tmp_ecc_handle != NULL && _len_ecc_handle != 0) {
+		_in_ecc_handle = (sgx_ecc_state_handle_t*)malloc(_len_ecc_handle);
+		if (_in_ecc_handle == NULL) {
+			status = SGX_ERROR_OUT_OF_MEMORY;
+			goto err;
+		}
+
+		memcpy(_in_ecc_handle, _tmp_ecc_handle, _len_ecc_handle);
+	}
+
+	ecall_ECDSAverifyMessage(_in_p_public, _in_p_signature, _in_ecc_handle);
+err:
+	if (_in_p_public) {
+		memcpy(_tmp_p_public, _in_p_public, _len_p_public);
+		free(_in_p_public);
+	}
+	if (_in_p_signature) {
+		memcpy(_tmp_p_signature, _in_p_signature, _len_p_signature);
+		free(_in_p_signature);
+	}
+	if (_in_ecc_handle) {
+		memcpy(_tmp_ecc_handle, _in_ecc_handle, _len_ecc_handle);
+		free(_in_ecc_handle);
 	}
 
 	return status;
@@ -370,12 +561,14 @@ err:
 
 SGX_EXTERNC const struct {
 	size_t nr_ecall;
-	struct {void* call_addr; uint8_t is_priv;} ecall_table[7];
+	struct {void* call_addr; uint8_t is_priv;} ecall_table[9];
 } g_ecall_table = {
-	7,
+	9,
 	{
 		{(void*)(uintptr_t)sgx_ecall_sum_array, 0},
-		{(void*)(uintptr_t)sgx_ecall_generate_ecc_key_pair, 0},
+		{(void*)(uintptr_t)sgx_ecall_test, 0},
+		{(void*)(uintptr_t)sgx_ecall_ECDSAsignMessage, 0},
+		{(void*)(uintptr_t)sgx_ecall_ECDSAverifyMessage, 0},
 		{(void*)(uintptr_t)sgx_ecall_sum_values, 0},
 		{(void*)(uintptr_t)sgx_enclaveChangeBuffer, 0},
 		{(void*)(uintptr_t)sgx_enclaveStringSave, 0},
@@ -386,16 +579,16 @@ SGX_EXTERNC const struct {
 
 SGX_EXTERNC const struct {
 	size_t nr_ocall;
-	uint8_t entry_table[6][7];
+	uint8_t entry_table[6][9];
 } g_dyn_entry_table = {
 	6,
 	{
-		{0, 0, 0, 0, 0, 0, 0, },
-		{0, 0, 0, 0, 0, 0, 0, },
-		{0, 0, 0, 0, 0, 0, 0, },
-		{0, 0, 0, 0, 0, 0, 0, },
-		{0, 0, 0, 0, 0, 0, 0, },
-		{0, 0, 0, 0, 0, 0, 0, },
+		{0, 0, 0, 0, 0, 0, 0, 0, 0, },
+		{0, 0, 0, 0, 0, 0, 0, 0, 0, },
+		{0, 0, 0, 0, 0, 0, 0, 0, 0, },
+		{0, 0, 0, 0, 0, 0, 0, 0, 0, },
+		{0, 0, 0, 0, 0, 0, 0, 0, 0, },
+		{0, 0, 0, 0, 0, 0, 0, 0, 0, },
 	}
 };
 

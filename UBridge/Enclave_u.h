@@ -24,7 +24,9 @@ int SGX_UBRIDGE(SGX_CDECL, sgx_thread_setwait_untrusted_events_ocall, (const voi
 int SGX_UBRIDGE(SGX_CDECL, sgx_thread_set_multiple_untrusted_events_ocall, (const void** waiters, size_t total));
 
 sgx_status_t ecall_sum_array(sgx_enclave_id_t eid, int* arr, size_t size, int* result);
-sgx_status_t ecall_generate_ecc_key_pair(sgx_enclave_id_t eid, sgx_ec256_public_t* pPublic);
+sgx_status_t ecall_test(sgx_enclave_id_t eid, sgx_ec256_private_t* pPrivate, sgx_ec256_public_t* pPublic, sgx_ecc_state_handle_t* handle);
+sgx_status_t ecall_ECDSAsignMessage(sgx_enclave_id_t eid, sgx_ec256_private_t* p_private, sgx_ecc_state_handle_t* ecc_handle, sgx_ec256_signature_t* p_signature);
+sgx_status_t ecall_ECDSAverifyMessage(sgx_enclave_id_t eid, sgx_ec256_public_t* p_public, sgx_ec256_signature_t* p_signature, sgx_ecc_state_handle_t* ecc_handle);
 sgx_status_t ecall_sum_values(sgx_enclave_id_t eid, int arr[5], int* result);
 sgx_status_t enclaveChangeBuffer(sgx_enclave_id_t eid, char* buf, size_t len);
 sgx_status_t enclaveStringSave(sgx_enclave_id_t eid, char* input, size_t len);

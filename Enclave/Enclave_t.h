@@ -17,7 +17,9 @@ extern "C" {
 
 
 void ecall_sum_array(int* arr, size_t size, int* result);
-void ecall_generate_ecc_key_pair(sgx_ec256_public_t* pPublic);
+void ecall_test(sgx_ec256_private_t* pPrivate, sgx_ec256_public_t* pPublic, sgx_ecc_state_handle_t* handle);
+void ecall_ECDSAsignMessage(sgx_ec256_private_t* p_private, sgx_ecc_state_handle_t* ecc_handle, sgx_ec256_signature_t* p_signature);
+void ecall_ECDSAverifyMessage(sgx_ec256_public_t* p_public, sgx_ec256_signature_t* p_signature, sgx_ecc_state_handle_t* ecc_handle);
 void ecall_sum_values(int arr[5], int* result);
 void enclaveChangeBuffer(char* buf, size_t len);
 void enclaveStringSave(char* input, size_t len);

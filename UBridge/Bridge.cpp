@@ -36,17 +36,27 @@ int main()
 	// generate key pair 
 	sgx_ec256_private_t * pPrivate;
 	sgx_ec256_public_t  pub;
-	sgx_ec256_public_t * pPublic = &pub;
-	int a[2] = { 0 };
-	uint8_t gy[SGX_ECP256_KEY_SIZE];
-	ecall_generate_ecc_key_pair(eid,pPublic);
-	std::cout << pPublic->gx << std::endl;
-	std::cout << pPublic->gy << std::endl;
-	//for (int i = 0; i < SGX_ECP256_KEY_SIZE; ++i) {
-	//	std::cout << pPublic->gx[i] << std::endl;
-	//	std::cout << pPublic->gy[i] << std::endl;
-	//}
-
+	sgx_ec256_public_t * tempPublic = &pub;
+	// generate ecc256 key pairs 
+	sgx_ecc_state_handle_t ecc_state = NULL;
+	sgx_ec256_private_t sk;
+	sgx_ec256_public_t pk;
+	sgx_status_t status = ecall_test(eid,&sk,&pk, &ecc_state);
+	if (status != SGX_SUCCESS){ 
+		std::cout << "\n Error %d while generate ecc key pair. \n" << std::endl;
+	}
+	std::cout << "--- start ECC key pair ---" << std::endl;
+	std::cout << "public x:" <<pk.gx << std::endl;
+	std::cout << "public y:" << pk.gy << std::endl;
+	std::cout << "private r:" << sk.r << std::endl;
+	std::cout << "--- end ECC key pair ---" << std::endl;
+	// sign a message using ECDSA 
+	ecc_state = nullptr;
+	sgx_ec256_signature_t signature;
+	ecall_ECDSAsignMessage(eid, &sk, &ecc_state,&signature);
+	// verify a message using ECDSA 
+	ecc_state = nullptr;
+	ecall_ECDSAverifyMessage(eid, &pk, &signature, &ecc_state);
 	// change buffer 
 	std::cout << "Buffer before change: " << buffer << std::endl;
 	enclaveChangeBuffer(eid, buffer, BUF_LEN);

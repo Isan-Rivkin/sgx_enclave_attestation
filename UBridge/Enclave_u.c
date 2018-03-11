@@ -7,9 +7,23 @@ typedef struct ms_ecall_sum_array_t {
 	int* ms_result;
 } ms_ecall_sum_array_t;
 
-typedef struct ms_ecall_generate_ecc_key_pair_t {
+typedef struct ms_ecall_test_t {
+	sgx_ec256_private_t* ms_pPrivate;
 	sgx_ec256_public_t* ms_pPublic;
-} ms_ecall_generate_ecc_key_pair_t;
+	sgx_ecc_state_handle_t* ms_handle;
+} ms_ecall_test_t;
+
+typedef struct ms_ecall_ECDSAsignMessage_t {
+	sgx_ec256_private_t* ms_p_private;
+	sgx_ecc_state_handle_t* ms_ecc_handle;
+	sgx_ec256_signature_t* ms_p_signature;
+} ms_ecall_ECDSAsignMessage_t;
+
+typedef struct ms_ecall_ECDSAverifyMessage_t {
+	sgx_ec256_public_t* ms_p_public;
+	sgx_ec256_signature_t* ms_p_signature;
+	sgx_ecc_state_handle_t* ms_ecc_handle;
+} ms_ecall_ECDSAverifyMessage_t;
 
 typedef struct ms_ecall_sum_values_t {
 	int* ms_arr;
@@ -140,12 +154,36 @@ sgx_status_t ecall_sum_array(sgx_enclave_id_t eid, int* arr, size_t size, int* r
 	return status;
 }
 
-sgx_status_t ecall_generate_ecc_key_pair(sgx_enclave_id_t eid, sgx_ec256_public_t* pPublic)
+sgx_status_t ecall_test(sgx_enclave_id_t eid, sgx_ec256_private_t* pPrivate, sgx_ec256_public_t* pPublic, sgx_ecc_state_handle_t* handle)
 {
 	sgx_status_t status;
-	ms_ecall_generate_ecc_key_pair_t ms;
+	ms_ecall_test_t ms;
+	ms.ms_pPrivate = pPrivate;
 	ms.ms_pPublic = pPublic;
+	ms.ms_handle = handle;
 	status = sgx_ecall(eid, 1, &ocall_table_Enclave, &ms);
+	return status;
+}
+
+sgx_status_t ecall_ECDSAsignMessage(sgx_enclave_id_t eid, sgx_ec256_private_t* p_private, sgx_ecc_state_handle_t* ecc_handle, sgx_ec256_signature_t* p_signature)
+{
+	sgx_status_t status;
+	ms_ecall_ECDSAsignMessage_t ms;
+	ms.ms_p_private = p_private;
+	ms.ms_ecc_handle = ecc_handle;
+	ms.ms_p_signature = p_signature;
+	status = sgx_ecall(eid, 2, &ocall_table_Enclave, &ms);
+	return status;
+}
+
+sgx_status_t ecall_ECDSAverifyMessage(sgx_enclave_id_t eid, sgx_ec256_public_t* p_public, sgx_ec256_signature_t* p_signature, sgx_ecc_state_handle_t* ecc_handle)
+{
+	sgx_status_t status;
+	ms_ecall_ECDSAverifyMessage_t ms;
+	ms.ms_p_public = p_public;
+	ms.ms_p_signature = p_signature;
+	ms.ms_ecc_handle = ecc_handle;
+	status = sgx_ecall(eid, 3, &ocall_table_Enclave, &ms);
 	return status;
 }
 
@@ -155,7 +193,7 @@ sgx_status_t ecall_sum_values(sgx_enclave_id_t eid, int arr[5], int* result)
 	ms_ecall_sum_values_t ms;
 	ms.ms_arr = (int*)arr;
 	ms.ms_result = result;
-	status = sgx_ecall(eid, 2, &ocall_table_Enclave, &ms);
+	status = sgx_ecall(eid, 4, &ocall_table_Enclave, &ms);
 	return status;
 }
 
@@ -165,7 +203,7 @@ sgx_status_t enclaveChangeBuffer(sgx_enclave_id_t eid, char* buf, size_t len)
 	ms_enclaveChangeBuffer_t ms;
 	ms.ms_buf = buf;
 	ms.ms_len = len;
-	status = sgx_ecall(eid, 3, &ocall_table_Enclave, &ms);
+	status = sgx_ecall(eid, 5, &ocall_table_Enclave, &ms);
 	return status;
 }
 
@@ -175,7 +213,7 @@ sgx_status_t enclaveStringSave(sgx_enclave_id_t eid, char* input, size_t len)
 	ms_enclaveStringSave_t ms;
 	ms.ms_input = input;
 	ms.ms_len = len;
-	status = sgx_ecall(eid, 4, &ocall_table_Enclave, &ms);
+	status = sgx_ecall(eid, 6, &ocall_table_Enclave, &ms);
 	return status;
 }
 
@@ -183,7 +221,7 @@ sgx_status_t enclaveLoadInt(sgx_enclave_id_t eid, int* retval)
 {
 	sgx_status_t status;
 	ms_enclaveLoadInt_t ms;
-	status = sgx_ecall(eid, 5, &ocall_table_Enclave, &ms);
+	status = sgx_ecall(eid, 7, &ocall_table_Enclave, &ms);
 	if (status == SGX_SUCCESS && retval) *retval = ms.ms_retval;
 	return status;
 }
@@ -193,7 +231,7 @@ sgx_status_t setSecretValue(sgx_enclave_id_t eid, int* value)
 	sgx_status_t status;
 	ms_setSecretValue_t ms;
 	ms.ms_value = value;
-	status = sgx_ecall(eid, 6, &ocall_table_Enclave, &ms);
+	status = sgx_ecall(eid, 8, &ocall_table_Enclave, &ms);
 	return status;
 }
 
