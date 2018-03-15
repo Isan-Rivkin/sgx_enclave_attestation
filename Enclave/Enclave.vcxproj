@@ -324,6 +324,7 @@
     <ClCompile Include="Enclave_t.c" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Enclave.h" />
     <ClInclude Include="Enclave_t.h" />
   </ItemGroup>
   <ItemGroup>

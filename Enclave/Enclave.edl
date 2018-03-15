@@ -9,9 +9,26 @@ enclave {
         /* define ECALLs here. */
 		public void ecall_sum_array([in, out, count=size] int *arr,size_t size, [in,out]int * result);
 		/*public void ecall_generate_ecc_key_pair([in,out] sgx_ec256_public_t * pPublic);*/
-		public void ecall_test([in,out] sgx_ec256_private_t * pPrivate, [in,out] sgx_ec256_public_t * pPublic,[in,out]  sgx_ecc_state_handle_t *handle);
-		public void ecall_ECDSAsignMessage([in,out] sgx_ec256_private_t *p_private,[in,out] sgx_ecc_state_handle_t * ecc_handle,[in,out] sgx_ec256_signature_t *p_signature);
-		public void ecall_ECDSAverifyMessage([in,out] sgx_ec256_public_t *p_public,[in,out] sgx_ec256_signature_t *p_signature,[in,out] sgx_ecc_state_handle_t * ecc_handle);
+		public void ecall_generateECKeyPair([in,out] sgx_ec256_private_t * pPrivate, [in,out] sgx_ec256_public_t * pPublic,[in,out]  sgx_ecc_state_handle_t *handle);
+		public void ecall_ECDSAsignMessage([in,out] sgx_ec256_private_t *p_private,[in,out] sgx_ecc_state_handle_t * ecc_handle,[in,out] sgx_ec256_signature_t *p_signature, [in,out,size=p_dataSize] uint8_t * p_data, size_t p_dataSize);
+		public void ecall_ECDSAverifyMessage([in,out] sgx_ec256_public_t *p_public,[in,out] sgx_ec256_signature_t *p_signature,[in,out] sgx_ecc_state_handle_t * ecc_handle, [in,out,size=p_dataSize] uint8_t * p_data, size_t p_dataSize, [out] uint8_t * p_result);
+
+		/* encrypt/decrypt AES-GCM*/
+
+		public void ecall_encrypt_rijndael128GCM([in, out]sgx_ec256_private_t * p_key,
+			[in, count = p_data_len] const uint8_t *p_data,
+			uint32_t p_data_len,
+			[out, count = p_data_len] uint8_t *p_dst,
+			[in, count = 12] const uint8_t *p_iv,
+			[in,out, count = 16] uint8_t* p_out_mac);
+				
+		public void ecall_decrypt_rijndael128GCM([in, out]sgx_ec256_private_t *p_key,
+			[in, count = p_data_len] const uint8_t *p_data,
+			uint32_t p_data_len,
+			[out, count = p_data_len] uint8_t *p_dst,
+			[in, count = 12] const uint8_t *p_iv,
+			[in,out, count = 16] uint8_t* p_in_mac);
+
 		/* to be deleted */
 		public void ecall_sum_values([in,out] int arr[5], [in,out] int * result);
 		public void enclaveChangeBuffer([out,size=len]char * buf, size_t len);

@@ -1,4 +1,8 @@
-﻿  Bridge.cpp
-d:\enigma\sgx\myprojects\enclave\ubridge\bridge.cpp(37): warning C4101: 'pPrivate': unreferenced local variable
+﻿  Creating untrusted proxy/bridge routines
+  Bridge.cpp
+d:\enigma\sgx\myprojects\enclave\ubridge\bridge.cpp(70): warning C4267: 'argument': conversion from 'size_t' to 'uint32_t', possible loss of data
+d:\enigma\sgx\myprojects\enclave\ubridge\bridge.cpp(78): warning C4267: 'argument': conversion from 'size_t' to 'uint32_t', possible loss of data
+d:\enigma\sgx\myprojects\enclave\ubridge\bridge.cpp(34): warning C4101: 'pPrivate': unreferenced local variable
+  Enclave_u.c
   UBridge.vcxproj -> D:\Enigma\SGX\MyProjects\Enclave\x64\Debug\UBridge.exe
   UBridge.vcxproj -> D:\Enigma\SGX\MyProjects\Enclave\x64\Debug\UBridge.pdb (Full PDB)

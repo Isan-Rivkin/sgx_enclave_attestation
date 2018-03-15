@@ -5,23 +5,12 @@
 #include <stdio.h>  
 #include "sgx_tcrypto.h"
 #include "sgx_ecp_types.h"
-//
-//sgx_ecc_param_t context;
-//sgx_ecc_state_handle_t * ecc_handle;
-//sgx_status_t status;
-//sgx_ec256_private_t key;
-//sgx_ec256_private_t * tPrivate = &key;
-//sgx_ec256_public_t  pub;
-//sgx_ec256_public_t * tPublic = &pub;
-//
-//
-///// new 
-//sgx_ecc_state_handle_t handle;
-//sgx_ec256_private_t sk;
-//sgx_ec256_public_t pk;
+#include "Enclave.h"
 
-// PROBLEM : the ecc_gandle context is null as seen inside the debbuger break point #21
-void ecall_test(sgx_ec256_private_t * pPrivate,sgx_ec256_public_t * pPublic, sgx_ecc_state_handle_t *handle)
+
+
+// generate EC key pair 
+void ecall_generateECKeyPair(sgx_ec256_private_t * pPrivate,sgx_ec256_public_t * pPublic, sgx_ecc_state_handle_t *handle)
 {
 	ocall_print_string("Generating key pair!\n");
 	sgx_status_t status = sgx_ecc256_open_context(handle);
@@ -36,28 +25,29 @@ void ecall_test(sgx_ec256_private_t * pPrivate,sgx_ec256_public_t * pPublic, sgx
 		ocall_print_string("[enclave:] no errors \n");
 	}
 }
+
 // sign message using ECC256 :ECDSA 
-void ecall_ECDSAsignMessage(sgx_ec256_private_t *p_private, sgx_ecc_state_handle_t * ecc_handle, sgx_ec256_signature_t *p_signature) {
+void ecall_ECDSAsignMessage(sgx_ec256_private_t *p_private, sgx_ecc_state_handle_t * ecc_handle, sgx_ec256_signature_t *p_signature, uint8_t * p_data, size_t p_dataSize) {
 	ocall_print_string("Signing message!\n");
-	uint8_t data = 's'; // the data 
 	sgx_status_t status = sgx_ecc256_open_context(ecc_handle); 
 	if (status) {
 		ocall_print_string("Some error 1 \n");
 	}
-	status = sgx_ecdsa_sign(&data, sizeof(data), p_private, p_signature, *ecc_handle);
+	status = sgx_ecdsa_sign(p_data, p_dataSize, p_private, p_signature, *ecc_handle);
 	if (status) {
 		ocall_print_string("Some error 2 \n");
 	}
 }
-void ecall_ECDSAverifyMessage(sgx_ec256_public_t *p_public, sgx_ec256_signature_t *p_signature, sgx_ecc_state_handle_t * ecc_handle) {
+
+void ecall_ECDSAverifyMessage(sgx_ec256_public_t *p_public, sgx_ec256_signature_t *p_signature, sgx_ecc_state_handle_t * ecc_handle, uint8_t * p_data, size_t p_dataSize, uint8_t * p_result) {
 	ocall_print_string("Verifying signature! \n");
-	uint8_t data = 's';
 	uint8_t result;
 	sgx_status_t status = sgx_ecc256_open_context(ecc_handle);
 	if (status) {
 		ocall_print_string("Some error 1 \n");
 	}
-	status = sgx_ecdsa_verify(&data, sizeof(data), p_public, p_signature, &result, *ecc_handle);
+	status = sgx_ecdsa_verify(p_data,p_dataSize, p_public, p_signature, &result, *ecc_handle);
+	*p_result = result;
 	if (status) {
 		ocall_print_string("Some error 2 \n");
 	}
@@ -71,9 +61,63 @@ void ecall_ECDSAverifyMessage(sgx_ec256_public_t *p_public, sgx_ec256_signature_
 		ocall_print_string("underfined error \n");
 	}
 }
-#define BUF_LEN 100
-char savedString[BUF_LEN] = "Default Enclave savedText";
-int savedInt = 5;
+
+uint8_t ccc[16];
+// encrypt data 
+void ecall_encrypt_rijndael128GCM(sgx_ec256_private_t * p_key,
+	const uint8_t *p_data, 
+	uint32_t p_data_len, 
+	uint8_t *p_dst, 
+	const uint8_t *p_iv,  
+	uint8_t* p_out_mac)
+{
+	sgx_status_t status = sgx_rijndael128GCM_encrypt((sgx_aes_gcm_128bit_key_t *)p_key->r, 
+		p_data, p_data_len, p_dst, p_iv, 12, NULL, 0, (sgx_aes_gcm_128bit_tag_t *)p_out_mac);
+}
+
+// decrypt data 
+void ecall_decrypt_rijndael128GCM(sgx_ec256_private_t *p_key,
+	const uint8_t *p_data,
+	uint32_t p_data_len,
+	uint8_t *p_dst,
+	const uint8_t *p_iv,
+	uint8_t* p_in_mac) 
+{
+	sgx_status_t status = sgx_rijndael128GCM_decrypt((sgx_aes_gcm_128bit_key_t*) p_key->r, 
+		p_data, p_data_len,p_dst,p_iv,12,NULL,0, (sgx_aes_gcm_128bit_tag_t *)p_in_mac);
+	switch (status) {
+	case SGX_SUCCESS: 
+	{
+		ocall_print_string("\nSGX_SUCCESS\n");
+		break;
+	}
+	case SGX_ERROR_INVALID_PARAMETER:
+	{
+		ocall_print_string("\nSGX_ERROR_INVALID_PARAMETER\n");
+		break;
+	}
+	case SGX_ERROR_MAC_MISMATCH: 
+	{
+		ocall_print_string("\nSGX_ERROR_MAC_MISMATCH\n");
+		break;
+	}
+	case SGX_ERROR_OUT_OF_MEMORY:
+	{
+		ocall_print_string("\nSGX_ERROR_OUT_OF_MEMORY\n");
+		break;
+	}
+	case SGX_ERROR_UNEXPECTED:
+	{
+		ocall_print_string("\nSGX_ERROR_UNEXPECTED\n");
+		break;
+	}
+	}
+
+}
+/*
+ret = sgx_rijndael128GCM_decrypt((sgx_aes_gcm_128bit_key_t *)g.secret, crypt, length, clear,
+iv, 12, NULL, 0, (sgx_aes_gcm_128bit_tag_t *)crypt_mac);
+*/
 
 void ecall_sum_array(int *arr, size_t size, int * result) {
 	int sum = 0; 

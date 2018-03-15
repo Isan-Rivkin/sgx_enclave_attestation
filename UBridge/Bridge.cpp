@@ -11,9 +11,6 @@
 
 void ocall_print_string(const char *str)
 {
-	/* Proxy/Bridge will check the length and null-terminate
-	* the input string to prevent buffer overflow.
-	*/
 	printf("%s", str);
 }
 
@@ -41,23 +38,46 @@ int main()
 	sgx_ecc_state_handle_t ecc_state = NULL;
 	sgx_ec256_private_t sk;
 	sgx_ec256_public_t pk;
-	sgx_status_t status = ecall_test(eid,&sk,&pk, &ecc_state);
+	sgx_status_t status = ecall_generateECKeyPair(eid,&sk,&pk, &ecc_state);
 	if (status != SGX_SUCCESS){ 
 		std::cout << "\n Error %d while generate ecc key pair. \n" << std::endl;
 	}
-	std::cout << "--- start ECC key pair ---" << std::endl;
-	std::cout << "public x:" <<pk.gx << std::endl;
-	std::cout << "public y:" << pk.gy << std::endl;
-	std::cout << "private r:" << sk.r << std::endl;
-	std::cout << "--- end ECC key pair ---" << std::endl;
+	sgx_ec256_private_t sk2 = sk;
 	// sign a message using ECDSA 
 	ecc_state = nullptr;
 	sgx_ec256_signature_t signature;
-	ecall_ECDSAsignMessage(eid, &sk, &ecc_state,&signature);
+	uint8_t d = 's';
+	uint8_t res;
+	uint8_t * p_result = &res;
+	uint8_t * p_data = &d;
+	size_t p_dataSize = sizeof(d);
+	ecall_ECDSAsignMessage(eid, &sk, &ecc_state,&signature, p_data,p_dataSize);
 	// verify a message using ECDSA 
 	ecc_state = nullptr;
-	ecall_ECDSAverifyMessage(eid, &pk, &signature, &ecc_state);
-	// change buffer 
+	ecall_ECDSAverifyMessage(eid, &pk, &signature, &ecc_state, p_data, p_dataSize, p_result);
+	// encrypt data 
+	uint8_t enc;
+	uint8_t * p_encrypted = &enc;
+	uint8_t crypt_mac[16];
+	uint8_t i;
+	uint8_t iv[12];
+	p_data[p_dataSize] = '\0';
+	std::cout << "Original message: " << p_data << std::endl;
+	for (int j = 0; j < 12; ++j) {
+		i = rand() % 256;
+		iv[j] = i;
+	}
+	ecall_encrypt_rijndael128GCM(eid, &sk, p_data, p_dataSize, p_encrypted, iv, crypt_mac);
+	
+	std::cout << "Encrypted message: ";
+	for (int j = 0; j < p_dataSize; j++)
+		std::cout << std::hex << int(p_encrypted[j]) << " ";
+	std::cout << std::dec << std::endl;
+
+	// decrypt data 
+	ecall_decrypt_rijndael128GCM(eid, &sk,p_encrypted, p_dataSize, p_data, iv, crypt_mac);
+	std::cout << "Decrypted Message:" << p_data << std::endl;
+	// change buffer	
 	std::cout << "Buffer before change: " << buffer << std::endl;
 	enclaveChangeBuffer(eid, buffer, BUF_LEN);
 	std::cout << "Buffer after change " << buffer << std::endl;

@@ -24,9 +24,11 @@ int SGX_UBRIDGE(SGX_CDECL, sgx_thread_setwait_untrusted_events_ocall, (const voi
 int SGX_UBRIDGE(SGX_CDECL, sgx_thread_set_multiple_untrusted_events_ocall, (const void** waiters, size_t total));
 
 sgx_status_t ecall_sum_array(sgx_enclave_id_t eid, int* arr, size_t size, int* result);
-sgx_status_t ecall_test(sgx_enclave_id_t eid, sgx_ec256_private_t* pPrivate, sgx_ec256_public_t* pPublic, sgx_ecc_state_handle_t* handle);
-sgx_status_t ecall_ECDSAsignMessage(sgx_enclave_id_t eid, sgx_ec256_private_t* p_private, sgx_ecc_state_handle_t* ecc_handle, sgx_ec256_signature_t* p_signature);
-sgx_status_t ecall_ECDSAverifyMessage(sgx_enclave_id_t eid, sgx_ec256_public_t* p_public, sgx_ec256_signature_t* p_signature, sgx_ecc_state_handle_t* ecc_handle);
+sgx_status_t ecall_generateECKeyPair(sgx_enclave_id_t eid, sgx_ec256_private_t* pPrivate, sgx_ec256_public_t* pPublic, sgx_ecc_state_handle_t* handle);
+sgx_status_t ecall_ECDSAsignMessage(sgx_enclave_id_t eid, sgx_ec256_private_t* p_private, sgx_ecc_state_handle_t* ecc_handle, sgx_ec256_signature_t* p_signature, uint8_t* p_data, size_t p_dataSize);
+sgx_status_t ecall_ECDSAverifyMessage(sgx_enclave_id_t eid, sgx_ec256_public_t* p_public, sgx_ec256_signature_t* p_signature, sgx_ecc_state_handle_t* ecc_handle, uint8_t* p_data, size_t p_dataSize, uint8_t* p_result);
+sgx_status_t ecall_encrypt_rijndael128GCM(sgx_enclave_id_t eid, sgx_ec256_private_t* p_key, const uint8_t* p_data, uint32_t p_data_len, uint8_t* p_dst, const uint8_t* p_iv, uint8_t* p_out_mac);
+sgx_status_t ecall_decrypt_rijndael128GCM(sgx_enclave_id_t eid, sgx_ec256_private_t* p_key, const uint8_t* p_data, uint32_t p_data_len, uint8_t* p_dst, const uint8_t* p_iv, uint8_t* p_in_mac);
 sgx_status_t ecall_sum_values(sgx_enclave_id_t eid, int arr[5], int* result);
 sgx_status_t enclaveChangeBuffer(sgx_enclave_id_t eid, char* buf, size_t len);
 sgx_status_t enclaveStringSave(sgx_enclave_id_t eid, char* input, size_t len);
